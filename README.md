@@ -14,6 +14,20 @@ When host `h2` tries pinging `h3`, it first has to find the MAC address for
 for these ARP requests in order to learn which host (MAC address) is connected
 to each port. The switch can then insert these MAC/port mappings in a L2 (MAC)
 table to forward future packets.
+```
+                   
+                   |---- 2. Add src port/MAC to ---- 3. Send back to --|
+                   |        L2 forwarding table.        data plane.    |
+Control plane      |                \                                  |
+.....................................\..........................................
+Data plane         |                  \                                |
+                   |                   \                               |
+ARP packet >-------|                    L2 table                       |---->
+
+          1. Add metadata to packet                      4. Forward or broadcast
+             and send to CPU.                               original ARP packet.
+ 
+```
 
 ## Running
 
@@ -36,8 +50,14 @@ You should implement the missing functionality in `l2switch.p4` and
 
 In the switch, you must implement the parser, forward ARP requests to the
 controller, decap packets received from the controller, and apply L2 (MAC)
-forwarding. In the controller, you have to handle packets received from the
+forwarding.
+
+In the controller, you have to handle packets received from the
 switch. They should be encapsulated in the `cpu_metadata` header, which is
 already defined in both the data plane (`l2switch.p4`) and control plane
 (`cpu_metadata.py`). This metadata header communicates packet information
-(e.g., original ingress port) between the data and control plane.
+(e.g., original ingress port) between the data and control plane. The
+controller should maintain a shadow table mapping MAC addresses to switch
+ports. If the controller adds a new mapping in the shadow table, it should
+add a coresponding table entry to the L2 table by calling
+`self.sw.insertTableEntry(table_name='MyIngress.fwd_l2'...`.
