@@ -15,6 +15,8 @@ class MacLearningController(Thread):
         self.start_wait = start_wait # time to wait for the controller to be listenning
         self.iface = sw.intfs[1].name
         self.stop_event = Event()
+        # TODO: increment respective counter upon receiving ARP request or response:
+        self.req_cnt, self.rep_cnt = 0, 0
         # TODO: initialize state (tables) for ARP here
 
     def handlePkt(self, pkt):
