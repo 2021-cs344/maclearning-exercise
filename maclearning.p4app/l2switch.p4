@@ -12,6 +12,8 @@ const port_t CPU_PORT           = 0x1;
 const bit<16> TYPE_ARP          = 0x0806;
 const bit<16> TYPE_CPU_METADATA = 0x080a;
 
+const bit<16> ARP_OP_REQ        = 0x0001;
+const bit<16> ARP_OP_REPLY      = 0x0002;
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -94,8 +96,13 @@ control MyIngress(inout headers hdr,
 
     apply {
 
-        // TODO: encapsulate ARP requests in the cpu_metadata header and
-        // forward them to CPU_PORT.
+        // TODO: check whether the control plane has already learned the srcEth
+        // in an ARP packet. If not, encapsulate the packet in the cpu_metadata
+        // header and it to the CPU_PORT.
+
+        // TODO: if it's an ARP request, and the control plane has already
+        // learned the srcEth, lookup the dstIP. If there's a hit, reply to the
+        // request (swap src/dst fields and send back to source port).
 
         // TODO: decap packets from the CPU before sending them out.
 
